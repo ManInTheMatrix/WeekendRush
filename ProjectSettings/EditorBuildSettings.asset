@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/ModernOffice_Interior_SampleLayout.unity
     guid: 2194fe559202da244a6cc0ad8cbc636d
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.input.settings: {fileID: 11400000, guid: 152f94b8bdc081c48a18c298dd61675c, type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: af3b5b4a153aab743a9c392dcfa71f1e, type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 4b433942858528c4495e4cdde5570914, type: 2}

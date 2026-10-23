@@ -1,0 +1,15 @@
+{
+  "asset": "74620f6712c35354da9b0600a21936b1",
+  "fileName": "01a164d0-9ffb-776a-940a-b656ae3ac5b0.wav",
+  "prompt": "for a game with horro theme where the guy is trapped in his office and trying to get out a looping theme song is needed",
+  "negativePrompt": "",
+  "model": "meta-musicgen",
+  "modelName": "Meta MusicGen",
+  "customSeed": -1,
+  "w3CTraceId": "",
+  "feedback": -1,
+  "duration": 10.0,
+  "autoTrim": false,
+  "hasReference": false,
+  "voice": "Adam"
+}

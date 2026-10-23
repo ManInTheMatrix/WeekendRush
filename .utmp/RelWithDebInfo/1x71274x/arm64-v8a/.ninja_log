@@ -1,0 +1,10 @@
+# ninja log v5
+0	2772	8144064912027009	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	b651b14d92bbb27e
+324	2783	8144064916331664	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	66a66fbf1f429845
+673	2784	8144064915576291	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	bf620c967bf4678f
+1029	2785	8144064921633673	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	93176c250e959d3
+1385	2787	8144064922018074	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	b25ae3b60e646855
+1725	2890	8144064924906979	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	effe8924a80b65d8
+2053	3331	8144064929313906	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	204194d72ea321ee
+2461	3481	8144064930801643	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	5cb1da4ccb55bfb7
+3481	4106	8144064937051734	C:/Unity/ManInTheMatrix/WeekendRush/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/1x71274x/obj/arm64-v8a/libgame.so	ac4c9b53f6551424

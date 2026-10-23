@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,6 +11,7 @@ public class ItemTemplate : ScriptableObject
     public bool isPickable;
     public bool isViewable;
     public string itemDescription;
+    public string nextHint;
     public Sprite itemImage;
 
     public string itemInteractSuccess;

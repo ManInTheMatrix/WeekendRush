@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -13,47 +13,113 @@ public class PlayerEyes : MonoBehaviour
     public GameObject secondCamera;
     public ItemDisplay itemDisplay;
     public FirstPersonController fpsScript;
+    public OVRPlayerController ovrPlayerScript;
+    public Transform rayOrigin;
     public Inventory inventoryScript;
 
-    Camera mainCam;
+    [Header("VR Hand Grabbers")]
+    public VRHandGrabber leftGrabber;
+    public VRHandGrabber rightGrabber;
+
+    public Camera mainCam;
     RaycastHit hit;
     bool isItemInView = false;
 
     void Start()
     {
-        mainCam = Camera.main;
+        if (mainCam == null)
+        {
+            mainCam = Camera.main;
+        }
     }
 
     private void Update()
     {
+        bool closeKey = false;
+        bool viewKey = false;
+        bool pickKey = false;
+        bool interactKey = false;
+
+#if ENABLE_INPUT_SYSTEM
+        if (UnityEngine.InputSystem.Keyboard.current != null)
+        {
+            var kb = UnityEngine.InputSystem.Keyboard.current;
+            closeKey = kb.cKey.wasPressedThisFrame;
+            viewKey = kb.vKey.wasPressedThisFrame;
+            pickKey = kb.pKey.wasPressedThisFrame;
+            interactKey = kb.eKey.wasPressedThisFrame;
+        }
+#elif ENABLE_LEGACY_INPUT_MANAGER
+        closeKey = Input.GetKeyDown(KeyCode.C);
+        viewKey = Input.GetKeyDown(KeyCode.V);
+        pickKey = Input.GetKeyDown(KeyCode.P);
+        interactKey = Input.GetKeyDown(KeyCode.E);
+#endif
+
+        bool closeInput = closeKey ||
+                          OVRInput.GetDown(OVRInput.Button.One) ||
+                          OVRInput.GetDown(OVRInput.Button.Two) ||
+                          OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger);
+
         if (hit.collider != null && !isItemInView)
         {
-            InteractableItem i = hit.collider.GetComponent<InteractableItem>();
+            InteractableItem i = hit.collider.GetComponentInParent<InteractableItem>();
 
-            if (Input.GetKeyDown(KeyCode.V) && i.item.isViewable)
+            if (i != null && i.item != null)
             {
-                isItemInView = true;
-                fpsScript.enabled = false;
-                SwitchMenuItems(false, null);
-                secondCamera.SetActive(true);
-                itemDisplay.gameObject.SetActive(true);
-                itemDisplay.DisplayData(i.item);
-                
-            }
-            else if (Input.GetKeyDown(KeyCode.P))
-            {
-                //InteractableItem i = hit.collider.GetComponent<InteractableItem>();
-                if (i.item.isPickable)
+                bool viewInput = viewKey ||
+                                 OVRInput.GetDown(OVRInput.Button.Three, OVRInput.Controller.LTouch) ||
+                                 OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick, OVRInput.Controller.LTouch);
+
+                // Right controller pick
+                bool pickRightInput = pickKey ||
+                                      OVRInput.GetDown(OVRInput.Button.Two, OVRInput.Controller.RTouch) ||
+                                      OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger, OVRInput.Controller.RTouch);
+
+                // Left controller pick
+                bool pickLeftInput = OVRInput.GetDown(OVRInput.Button.Four, OVRInput.Controller.LTouch) ||
+                                     OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger, OVRInput.Controller.LTouch);
+
+                bool interactInput = interactKey ||
+                                     OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.RTouch) ||
+                                     OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch);
+
+                if (viewInput && i.item.isViewable)
                 {
-                    inventoryScript.ItemPicked(i);
+                    isItemInView = true;
+                    if (fpsScript != null) fpsScript.enabled = false;
+                    if (ovrPlayerScript != null)
+                    {
+                        ovrPlayerScript.EnableLinearMovement = false;
+                        ovrPlayerScript.EnableRotation = false;
+                    }
+                    SwitchMenuItems(false, null);
+                    if (secondCamera != null) secondCamera.SetActive(true);
+                    if (itemDisplay != null)
+                    {
+                        itemDisplay.gameObject.SetActive(true);
+                        itemDisplay.DisplayData(i.item);
+                    }
                 }
-            }
-            else if (Input.GetKeyDown(KeyCode.E))
-            {
-                //InteractableItem i = hit.collider.GetComponent<InteractableItem>();
-                if (i.item.isInteractable)
+                else if (i.item.isPickable && (pickRightInput || pickLeftInput))
                 {
-                    inventoryScript.InteractWithItem(i);
+                    // Pick into the hand that pressed the button
+                    if (pickLeftInput && leftGrabber != null)
+                    {
+                        leftGrabber.GrabItem(i);
+                    }
+                    else if (rightGrabber != null)
+                    {
+                        rightGrabber.GrabItem(i);
+                    }
+                    else if (inventoryScript != null)
+                    {
+                        inventoryScript.ItemPicked(i);
+                    }
+                }
+                else if (interactInput && i.item.isInteractable)
+                {
+                    if (inventoryScript != null) inventoryScript.InteractWithItem(i);
                 }
             }
         }
@@ -61,56 +127,60 @@ public class PlayerEyes : MonoBehaviour
         {
             SwitchMenuItems(false, null);
         }
-        if (isItemInView && Input.GetKeyDown(KeyCode.C))
+
+        if (isItemInView && closeInput)
         {
             isItemInView = false;
-            fpsScript.enabled = true;
-            secondCamera.SetActive(false);
-            itemDisplay.gameObject.SetActive(false);
+            if (fpsScript != null) fpsScript.enabled = true;
+            if (ovrPlayerScript != null)
+            {
+                ovrPlayerScript.EnableLinearMovement = true;
+                ovrPlayerScript.EnableRotation = true;
+            }
+            if (secondCamera != null) secondCamera.SetActive(false);
+            if (itemDisplay != null) itemDisplay.gameObject.SetActive(false);
         }
     }
 
     void FixedUpdate()
     {
-        Ray ray = mainCam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-        //Debug.DrawRay(ray.origin, ray.direction);
-        if (Physics.Raycast(ray, out hit, 5f) && !isItemInView)
+        bool hasHit = false;
+
+        if (rayOrigin != null)
         {
-            InteractableItem i = hit.collider.GetComponent<InteractableItem>();
+            Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
+            hasHit = Physics.Raycast(ray, out hit, 5f);
+        }
+
+        if (!hasHit && mainCam != null)
+        {
+            Ray ray = mainCam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+            hasHit = Physics.Raycast(ray, out hit, 5f);
+        }
+
+        if (hasHit && !isItemInView && hit.collider != null)
+        {
+            InteractableItem i = hit.collider.GetComponentInParent<InteractableItem>();
             if (i != null)
             {
                 SwitchMenuItems(true, i);
             }
             else
             {
-                SwitchMenuItems(false, i);
+                SwitchMenuItems(false, null);
             }
         }
-        
+        else if (!isItemInView)
+        {
+            SwitchMenuItems(false, null);
+        }
     }
 
     void SwitchMenuItems(bool flag, InteractableItem i) 
     {
-        if (flag)
-        {
-            if (i.item.isInteractable)
-            {
-                interact.SetActive(true);
-            }
-            if (i.item.isPickable)
-            {
-                pick.SetActive(true);
-            }
-            if (i.item.isViewable)
-            {
-                view.SetActive(true);
-            }
-        }
-        else
-        {
-            interact.SetActive(false);
-            pick.SetActive(false);
-            view.SetActive(false);
-        }
+        // Screen-space menu items are disabled in favor of world-space floating tooltips directly on the items
+        if (interact != null) interact.SetActive(false);
+        if (pick != null) pick.SetActive(false);
+        if (view != null) view.SetActive(false);
     }
 }

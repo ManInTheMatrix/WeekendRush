@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -46,11 +46,17 @@ public class GameManager : MonoBehaviour
         {
             computer.SetActive(true);
             door.ChangeMissingPiece(true);
+
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlaySuccess();
         }
     }
 
     public void DoorUnlocked()
     {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySuccess();
+
         SceneManager.LoadScene(0);
     }
 }

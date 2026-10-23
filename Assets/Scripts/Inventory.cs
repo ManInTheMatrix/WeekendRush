@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,9 +17,11 @@ public class Inventory : MonoBehaviour
     {
         if (it.item == torchTemplate)
         {
-            torch.SetActive(true);
-            it.gameObject.SetActive(false);
-            Debug.Log("torch");
+            if (torch != null && torch != it.gameObject)
+            {
+                torch.SetActive(true);
+            }
+            Debug.Log("torch picked");
             return;
         }
         else
@@ -31,8 +33,10 @@ public class Inventory : MonoBehaviour
             }
 
             inventoryItem = it;
-            image.sprite = it.item.itemImage;
-            it.gameObject.SetActive(false);
+            if (image != null && it.item.itemImage != null)
+            {
+                image.sprite = it.item.itemImage;
+            }
         }
     }
 

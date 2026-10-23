@@ -15,7 +15,8 @@ public class EventSystemChecker : MonoBehaviour
            //Instantiate(eventSystem);
             GameObject obj = new GameObject("EventSystem");
             obj.AddComponent<EventSystem>();
-            obj.AddComponent<StandaloneInputModule>().forceModuleActive = true;
+            obj.AddComponent<StandaloneInputModule>(); // forceModuleActive removed: deprecated in newer Unity versions
+
         }
 	}
 }
